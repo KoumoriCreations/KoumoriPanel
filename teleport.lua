@@ -107,6 +107,70 @@ UIStroke2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStroke2.Thickness = 2
 UIStroke2.Parent = textBox
 
+-- // Create Suggestion Frame
+local suggestionFrame = Instance.new("Frame")
+suggestionFrame.AnchorPoint = Vector2.new(0.5, 1)
+suggestionFrame.Position = UDim2.fromScale(0.5, 0.42)
+suggestionFrame.Size = UDim2.fromScale(0.7, 0.1)
+suggestionFrame.BackgroundTransparency = 1
+suggestionFrame.Parent = frame
+
+-- // UIListLayout For Suggestions
+local suggestionLayout = Instance.new("UIListLayout")
+suggestionLayout.SortOrder = Enum.SortOrder.LayoutOrder
+suggestionLayout.VerticalAlignment = "Bottom"
+suggestionLayout.Parent = suggestionFrame
+
+-- // Function To Update Suggestions
+local function updateSuggestions(input)
+	-- // Clear Previous Suggestions
+	for _, child in pairs(suggestionFrame:GetChildren()) do
+		if child:IsA("TextButton") then
+			child:Destroy()
+		end
+	end
+	
+	-- // Require At Least 2 Letters To Start Suggestions
+	if #input < 2 then 
+		return 
+	end
+	
+	-- // Lower Input
+	local lowerInput = string.lower(input)
+	
+	-- // Loop
+	for _, plr in ipairs(Players:GetPlayers()) do
+		local name = plr.Name
+		if string.sub(string.lower(name), 1, #input) == lowerInput then
+			local suggestionBtn = Instance.new("TextButton")
+			suggestionBtn.Size = UDim2.fromScale(1, 0.5)
+			suggestionBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+			suggestionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+			suggestionBtn.Font = Enum.Font.FredokaOne
+			suggestionBtn.TextScaled = true
+			suggestionBtn.Text = name
+			suggestionBtn.Parent = suggestionFrame
+
+			-- // Click Fills Textbox
+			suggestionBtn.MouseButton1Click:Connect(function()
+				textBox.Text = name
+				
+				-- // Clear Suggestions After Click
+				for _, child in pairs(suggestionFrame:GetChildren()) do
+					if child:IsA("TextButton") then
+						child:Destroy()
+					end
+				end
+			end)
+		end
+	end
+end
+
+-- // Connect textbox changes to suggestions
+textBox:GetPropertyChangedSignal("Text"):Connect(function()
+	updateSuggestions(textBox.Text)
+end)
+
 -- // Create Teleport Button
 local teleportButton = Instance.new("TextButton")
 teleportButton.Text = "Teleport"
@@ -141,7 +205,7 @@ end
 -- // Listen for Right Shift
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
-	
+
 	if input.KeyCode == Enum.KeyCode.RightShift then
 		toggleFrame()
 	elseif input.KeyCode == Enum.KeyCode.Delete then
@@ -154,44 +218,44 @@ teleportButton.Activated:Connect(function()
 	local random = Random.new()
 	clickSfx.PlaybackSpeed = random:NextNumber(0.5, 2.5)
 	clickSfx:Play()
-	
+
 	-- // Target Name
 	local targetName = textBox.Text
-	
+
 	-- // Check If Nothing Was Typed
 	if targetName == "" then
 		textBox.Text = " Type a player's name! "
 		return
 	end
-	
+
 	-- // Target Player
 	local targetPlayer = Players:FindFirstChild(targetName)
-	
+
 	-- // Check If Player Exists
 	if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
 		textBox.Text = " " .. targetName .. " Does Not Exist or Has No Character "
 		return
 	end
-	
+
 	-- // Character + Check
 	local localChar = player.Character
-	
+
 	if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then
 		textBox.Text = " Your character is missing! "
 		return
 	end
-	
+
 	-- // Enable Noclip
 	for _, part in pairs(localChar:GetDescendants()) do
 		if part:IsA("BasePart") then
 			part.CanCollide = false
 		end
 	end
-	
+
 	-- // Target CFrame
 	local targetCFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
 
-	-- // Distance → Duration
+	-- // Distance ? Duration
 	local distance = (localChar.HumanoidRootPart.Position - targetCFrame.Position).Magnitude
 	local speedFactor = 35 -- // Higher = Faster
 	local tweenDuration = math.clamp(distance / speedFactor, 2, 60)
@@ -208,7 +272,7 @@ teleportButton.Activated:Connect(function()
 			connection:Disconnect()
 			return
 		end
-		
+
 		for _, part in pairs(localChar:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
@@ -216,7 +280,7 @@ teleportButton.Activated:Connect(function()
 		end
 	end)
 
-	-- // Done → Restore Normal Physics
+	-- // Done ? Restore Normal Physics
 	tween.Completed:Connect(function()
 		connection:Disconnect()
 	end)
