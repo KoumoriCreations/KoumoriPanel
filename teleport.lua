@@ -205,7 +205,7 @@ teleportButton.Activated:Connect(function()
 	-- // Distance → Duration
 	local distance = (localChar.HumanoidRootPart.Position - targetCFrame.Position).Magnitude
 	local speedFactor = 30
-	local tweenDuration = math.clamp(distance / speedFactor, 0.25, 12)
+	local tweenDuration = math.max(distance / speedFactor, 2)
 
 	-- // Tween
 	local tweenInfo = TweenInfo.new(tweenDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
