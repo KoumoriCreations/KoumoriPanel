@@ -181,9 +181,6 @@ teleportButton.Activated:Connect(function()
 		return
 	end
 	
-	-- // Humanoid
-	local humanoid = localChar:FindFirstChild("Humanoid")
-	
 	-- // Enable Noclip
 	for _, part in pairs(localChar:GetDescendants()) do
 		if part:IsA("BasePart") then
@@ -191,21 +188,13 @@ teleportButton.Activated:Connect(function()
 		end
 	end
 	
-	-- // Disable Physics & Anchor
-	if humanoid then
-		humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-		humanoid.AutoRotate = false
-	end
-	
-	localChar.HumanoidRootPart.Anchored = true
-
 	-- // Target CFrame
 	local targetCFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
 
 	-- // Distance → Duration
 	local distance = (localChar.HumanoidRootPart.Position - targetCFrame.Position).Magnitude
-	local speedFactor = 30 -- // Higher = Faster
-	local tweenDuration = distance / speedFactor
+	local speedFactor = 25 -- // Higher = Faster
+	local tweenDuration = math.clamp(distance / speedFactor, 2, 60)
 
 	-- // Tween
 	local tweenInfo = TweenInfo.new(tweenDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -230,13 +219,6 @@ teleportButton.Activated:Connect(function()
 	-- // Done → Restore Normal Physics
 	tween.Completed:Connect(function()
 		connection:Disconnect()
-
-		localChar.HumanoidRootPart.Anchored = false
-
-		if humanoid then
-			humanoid.AutoRotate = true
-			humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
-		end
 	end)
 end)
 
