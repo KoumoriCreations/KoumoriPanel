@@ -1,6 +1,8 @@
 -- // Services
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 -- // Player & PlayerGui
 local player = Players.LocalPlayer
@@ -177,12 +179,37 @@ teleportButton.Activated:Connect(function()
 		return
 	end
 	
-	-- // Jump Before Teleporting
-	localChar.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+	-- // Enable Noclip
+	for _, part in pairs(localChar:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = false
+		end
+	end
+	
+	-- // Tween to target
+	local targetCFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+	local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) -- duration 1.5s
+	local tween = TweenService:Create(localChar.HumanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+	tween:Play()
 
-	-- // Teleport
-	task.wait(1)
-	localChar.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+	-- // Keep noclipping during tween
+	local connection
+	connection = RunService.Stepped:Connect(function()
+		if not localChar or not localChar.Parent then
+			connection:Disconnect()
+			return
+		end
+		for _, part in pairs(localChar:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end)
+
+	-- // Disconnect after tween completes
+	tween.Completed:Connect(function()
+		connection:Disconnect()
+	end)
 end)
 
 -- // Teleport Button Hover
