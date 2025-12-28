@@ -70,7 +70,7 @@ closeText.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeText.Size = UDim2.fromScale(0.8, 0.08)
 closeText.Font = Enum.Font.FredokaOne
 closeText.TextScaled = true
-closeText.Text = "Right Shift To Open/Close Panel."
+closeText.Text = "Right Shift To Open/Close Panel. Del to end script."
 closeText.Parent = frame
 
 -- // Create Logo Image
@@ -144,6 +144,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	
 	if input.KeyCode == Enum.KeyCode.RightShift then
 		toggleFrame()
+	elseif input.KeyCode == Enum.KeyCode.Delete then
+		screenGui:Destroy()
 	end
 end)
 
@@ -187,8 +189,9 @@ teleportButton.Activated:Connect(function()
 	end
 	
 	-- // Tween to target
-	local targetCFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
-	local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) -- duration 1.5s
+	local tweenSpeed = 5
+	local targetCFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+	local tweenInfo = TweenInfo.new(tweenSpeed, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) -- duration 1.5s
 	local tween = TweenService:Create(localChar.HumanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 	tween:Play()
 
@@ -199,6 +202,7 @@ teleportButton.Activated:Connect(function()
 			connection:Disconnect()
 			return
 		end
+		
 		for _, part in pairs(localChar:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
