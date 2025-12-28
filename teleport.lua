@@ -188,10 +188,18 @@ teleportButton.Activated:Connect(function()
 		end
 	end
 	
-	-- // Tween to target
-	local tweenSpeed = 5
+	-- // Target CFrame
 	local targetCFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-	local tweenInfo = TweenInfo.new(tweenSpeed, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) -- duration 1.5s
+	
+	-- // Calculate distance
+	local distance = (localChar.HumanoidRootPart.Position - targetCFrame.Position).Magnitude
+	
+	-- // Speed Factor (studs per second)
+	local speedFactor = 30 -- // Higher = Faster
+	local tweenDuration = distance / speedFactor
+	
+	-- // Tween to target
+	local tweenInfo = TweenInfo.new(tweenDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local tween = TweenService:Create(localChar.HumanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 	tween:Play()
 
