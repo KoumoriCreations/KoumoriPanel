@@ -161,6 +161,32 @@ UICorner.Parent = blindshotMenuButton
 
 blindshotMenuButton.Parent = frame2
 
+-- // Create Bloxfruit Menu Button
+local bloxfruitMenuButton = Instance.new("TextButton")
+bloxfruitMenuButton.Text = "Bloxfruit"
+bloxfruitMenuButton.Size = UDim2.fromScale(0.9, 0.12)
+bloxfruitMenuButton.AnchorPoint = Vector2.new(0.5, 0)
+bloxfruitMenuButton.Position = UDim2.fromScale(0.5, 0.68)
+bloxfruitMenuButton.BackgroundColor3 = Color3.fromRGB(100,100,100)
+bloxfruitMenuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+bloxfruitMenuButton.Font = Enum.Font.FredokaOne
+bloxfruitMenuButton.TextScaled = true
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.Parent = bloxfruitMenuButton
+
+local UIStroke2 = Instance.new("UIStroke")
+UIStroke2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+UIStroke2.Thickness = 2
+UIStroke2.Parent = bloxfruitMenuButton
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0.2, 0)
+UICorner.Parent = bloxfruitMenuButton
+
+bloxfruitMenuButton.Parent = frame2
+
 -- // >>>>>>>>>>>>>>>>>>>>>>>>>>>><|[TELEPORT MENU]|><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \\
 -- // Create Frame
 local teleportFrame = Instance.new("Frame")
@@ -813,6 +839,370 @@ injectESPBSButton.InputBegan:Connect(function(inputObject)
 end)
 
 -- // >>>>>>>>>>>>>>>>>>>>>>>>>>>><|[BLOXFRUIT MENU]|><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \\
+-- // Create Frame
+local bloxfruitFrame = Instance.new("Frame")
+bloxfruitFrame.Position = UDim2.fromScale(0.3, 0)
+bloxfruitFrame.Size = UDim2.fromScale(0.7, 1)
+bloxfruitFrame.BackgroundTransparency = 1
+bloxfruitFrame.Visible = false
+bloxfruitFrame.Parent = frame
+
+-- // Create Title
+local title = Instance.new("TextLabel")
+title.AnchorPoint = Vector2.new(0.5, 0)
+title.Position = UDim2.fromScale(0.5, 0)
+title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+title.BackgroundTransparency = 0.8
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Size = UDim2.fromScale(1, 0.2)
+title.Font = Enum.Font.FredokaOne
+title.TextScaled = true
+title.Text = " Bloxfruit Menu (WIP) "
+title.Parent = bloxfruitFrame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.Parent = title
+
+-- // Create Logo Image
+local logo = Instance.new("ImageLabel")
+logo.AnchorPoint = Vector2.new(0.5, 0.5)
+logo.Size = UDim2.fromScale(1, 1)
+logo.BackgroundTransparency = 1
+logo.Image = "rbxassetid://136167448958896"
+logo.Position = UDim2.fromScale(0.5, 0.5)
+logo.ImageTransparency = 0.9
+logo.Parent = bloxfruitFrame
+
+-- // Create RatioConstraint (keeps logo from stretching)
+local RatioConstraint = Instance.new("UIAspectRatioConstraint")
+RatioConstraint.Parent = logo
+
+-- // Create Button
+local injectBFButton = Instance.new("TextButton")
+injectBFButton.Text = "Aim Cheats+ESP (Off)"
+injectBFButton.Size = UDim2.fromScale(0.5, 0.2)
+injectBFButton.AnchorPoint = Vector2.new(0.5, 0.5)
+injectBFButton.Position = UDim2.fromScale(0.5, 0.75)
+injectBFButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+injectBFButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+injectBFButton.Font = Enum.Font.FredokaOne
+injectBFButton.TextScaled = true
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.Parent = injectBFButton
+
+local UIStroke2 = Instance.new("UIStroke")
+UIStroke2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+UIStroke2.Thickness = 2
+UIStroke2.Parent = injectBFButton
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0.2, 0)
+UICorner.Parent = injectBFButton
+
+injectBFButton.Parent = bloxfruitFrame
+
+-- // Settings
+local FEATURES_ENABLED = false
+local connections = {}
+local screenGui
+
+-- // Button Click
+injectBFButton.Activated:Connect(function()
+	local random = Random.new()
+	clickSfx.PlaybackSpeed = random:NextNumber(0.5, 2.5)
+	clickSfx:Play()
+
+	FEATURES_ENABLED = not FEATURES_ENABLED
+
+	if FEATURES_ENABLED then
+		injectBFButton.Text = "Aim Cheats+ESP (On)"
+		injectBFButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+
+		-- Local ESP + Names + Aimlock (Camera-Based) + Head Visibility Alert
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+		local RunService = game:GetService("RunService")
+		local UserInputService = game:GetService("UserInputService")
+		local Camera = workspace.CurrentCamera
+		local SoundService = game:GetService("SoundService")
+
+		-- ESP Settings
+		local FILL_TRANSPARENCY = 0.7
+		local OUTLINE_TRANSPARENCY = 0
+		local ALWAYS_ON_TOP = true
+		local PLAYER_COLORS = Color3.fromRGB(255, 0, 0)
+		local VISIBLE_COLOR = Color3.fromRGB(255, 255, 0)
+
+		-- Aimlock Settings
+		local AIM_ENABLED = false
+		local AIM_SMOOTHNESS = 0.2 -- smaller = faster snap
+
+		-- FOV Settings
+		local FOV_RADIUS = 360
+		local FOV_VISIBLE_ONLY = true
+
+		-- ===========================================
+		-- ESP FUNCTIONS
+		-- ===========================================
+		local function applyHighlight(player, character)
+			if player ~= LocalPlayer then
+				if not character then return end
+				local highlight = character:FindFirstChild("ESP_Highlight")
+				if not highlight then
+					highlight = Instance.new("Highlight")
+					highlight.Name = "ESP_Highlight"
+					highlight.Adornee = character
+					highlight.OutlineTransparency = OUTLINE_TRANSPARENCY
+					highlight.FillTransparency = FILL_TRANSPARENCY
+					highlight.DepthMode = ALWAYS_ON_TOP and Enum.HighlightDepthMode.AlwaysOnTop or Enum.HighlightDepthMode.Occluded
+					highlight.Parent = character
+				end
+				highlight.FillColor = PLAYER_COLORS
+				highlight.OutlineColor = PLAYER_COLORS
+			end
+		end
+
+		local function applyNameTag(player, character)
+			if player ~= LocalPlayer then
+				if not character then return end
+				local head = character:WaitForChild("Head", 5)
+				if not head then return end
+				local tag = head:FindFirstChild("ESP_NameTag")
+				if not tag then
+					local billboard = Instance.new("BillboardGui")
+					billboard.Name = "ESP_NameTag"
+					billboard.Size = UDim2.new(0, 150, 0, 50)
+					billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+					billboard.AlwaysOnTop = true
+					billboard.Parent = head
+
+					local label = Instance.new("TextLabel")
+					label.Name = "Label"
+					label.Size = UDim2.fromScale(1, 1)
+					label.BackgroundTransparency = 1
+					label.TextScaled = true
+					label.Font = Enum.Font.GothamBold
+					label.TextStrokeTransparency = 0.2
+					label.Parent = billboard
+				end
+				local label = head:FindFirstChild("ESP_NameTag"):FindFirstChild("Label")
+				if label then
+					label.Text = player.Name
+					label.TextColor3 = PLAYER_COLORS
+				end
+			end
+		end
+
+		local function setupCharacter(player, character)
+			applyHighlight(player, character)
+			applyNameTag(player, character)
+		end
+
+		local function setupPlayer(player)
+			if player.Character then
+				setupCharacter(player, player.Character)
+			end
+
+			table.insert(connections,
+				player.CharacterAdded:Connect(function(char)
+					setupCharacter(player, char)
+				end)
+			)
+
+			table.insert(connections,
+				player:GetPropertyChangedSignal("Team"):Connect(function()
+					if player.Character then
+						applyHighlight(player, player.Character)
+						applyNameTag(player, player.Character)
+					end
+				end)
+			)
+		end
+
+		for _, p in ipairs(Players:GetPlayers()) do
+			setupPlayer(p)
+		end
+
+		table.insert(connections, Players.PlayerAdded:Connect(setupPlayer))
+
+		table.insert(connections,
+			LocalPlayer:GetPropertyChangedSignal("Team"):Connect(function()
+				for _, p in ipairs(Players:GetPlayers()) do
+					if p.Character then
+						applyHighlight(p, p.Character)
+						applyNameTag(p, p.Character)
+					end
+				end
+			end)
+		)
+
+		-- ===========================================
+		-- AIMLOCK INPUT (Right-Click Hold)
+		-- ===========================================
+		table.insert(connections,
+			UserInputService.InputBegan:Connect(function(input, gameProcessed)
+				if gameProcessed then return end
+				if input.UserInputType == Enum.UserInputType.MouseButton2 then
+					AIM_ENABLED = true
+				end
+			end)
+		)
+
+		table.insert(connections,
+			UserInputService.InputEnded:Connect(function(input, gameProcessed)
+				if input.UserInputType == Enum.UserInputType.MouseButton2 then
+					AIM_ENABLED = false
+				end
+			end)
+		)
+
+		-- ===========================================
+		-- FOV CIRCLE
+		-- ===========================================
+		screenGui = LocalPlayer:FindFirstChildOfClass("PlayerGui"):FindFirstChild("AimAssistGui")
+		if not screenGui then
+			screenGui = Instance.new("ScreenGui")
+			screenGui.Name = "AimAssistGui"
+			screenGui.ResetOnSpawn = false
+			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+		end
+
+		local fovCircle = Instance.new("Frame")
+		fovCircle.Size = UDim2.fromOffset(FOV_RADIUS * 2, FOV_RADIUS * 2)
+		fovCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+		fovCircle.BackgroundTransparency = 1
+		fovCircle.BorderSizePixel = 2
+		fovCircle.BorderColor3 = Color3.fromRGB(255, 255, 255)
+		fovCircle.Parent = screenGui
+
+		table.insert(connections,
+			RunService.RenderStepped:Connect(function()
+				local mousePos = UserInputService:GetMouseLocation()
+				fovCircle.Position = UDim2.fromOffset(mousePos.X, mousePos.Y)
+			end)
+		)
+
+		-- ===========================================
+		-- TARGET SELECTION
+		-- ===========================================
+		local function getClosestEnemy()
+			local closestDist = FOV_RADIUS
+			local closestPlayer = nil
+			local mousePos = UserInputService:GetMouseLocation()
+
+			for _, player in pairs(Players:GetPlayers()) do
+				if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+					local hrp = player.Character.HumanoidRootPart
+					local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+
+					if onScreen then
+						local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(mousePos.X, mousePos.Y)).Magnitude
+
+						if dist <= closestDist then
+							if FOV_VISIBLE_ONLY then
+								local params = RaycastParams.new()
+								params.FilterDescendantsInstances = {LocalPlayer.Character}
+								params.FilterType = Enum.RaycastFilterType.Blacklist
+
+								local result = workspace:Raycast(Camera.CFrame.Position, (hrp.Position - Camera.CFrame.Position), params)
+
+								if result and not result.Instance:IsDescendantOf(player.Character) then
+									continue
+								end
+							end
+
+							closestDist = dist
+							closestPlayer = player
+						end
+					end
+				end
+			end
+
+			return closestPlayer
+		end
+
+		-- ===========================================
+		-- AIMLOCK LOOP
+		-- ===========================================
+		table.insert(connections,
+			RunService.RenderStepped:Connect(function()
+				if AIM_ENABLED then
+					local target = getClosestEnemy()
+					if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+						local hrpPos = target.Character.HumanoidRootPart.Position
+						local camCF = Camera.CFrame
+
+						Camera.CFrame = camCF:Lerp(CFrame.lookAt(camCF.Position, hrpPos), AIM_SMOOTHNESS)
+
+						local raycastParams = RaycastParams.new()
+						raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+						raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+						local result = workspace:Raycast(camCF.Position, (hrpPos - camCF.Position), raycastParams)
+						local hrpVisible = result == nil or result.Instance:IsDescendantOf(target.Character)
+
+						local labelHolder = target.Character:FindFirstChild("Head")
+						local tag = labelHolder and labelHolder:FindFirstChild("ESP_NameTag")
+						local label = tag and tag:FindFirstChild("Label")
+						if label then
+							label.TextColor3 = hrpVisible and VISIBLE_COLOR or PLAYER_COLORS
+						end
+
+						if hrpVisible and not target.Character.HumanoidRootPart:FindFirstChild("HumanoidRootPartSeenFlag") then
+							local flag = Instance.new("BoolValue")
+							flag.Name = "HumanoidRootPartSeenFlag"
+							flag.Parent = target.Character.HumanoidRootPart
+						elseif not hrpVisible and target.Character.HumanoidRootPart:FindFirstChild("HumanoidRootPartSeenFlag") then
+							target.Character.HumanoidRootPart:FindFirstChild("HumanoidRootPartSeenFlag"):Destroy()
+						end
+					end
+				end
+			end)
+		)
+
+	else
+		injectBFButton.Text = "Aim Cheats+ESP (Off)"
+		injectBFButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+		
+		-- disconnect all events
+		for _, c in ipairs(connections) do
+			if c and c.Disconnect then
+				c:Disconnect()
+			end
+		end
+
+		table.clear(connections)
+
+		-- remove FOV GUI
+		if screenGui then
+			screenGui:Destroy()
+			screenGui = nil
+		end
+
+		-- remove ESP highlights & name tags
+		for _, p in ipairs(game:GetService("Players"):GetPlayers()) do
+			if p.Character then
+				for _, inst in ipairs(p.Character:GetChildren()) do
+					if inst.Name == "ESP_Highlight" then inst:Destroy() end
+				end
+				local head = p.Character:FindFirstChild("Head")
+				if head and head:FindFirstChild("ESP_NameTag") then
+					head.ESP_NameTag:Destroy()
+				end
+			end
+		end
+	end
+end)
+
+-- // Button Hover
+injectBFButton.InputBegan:Connect(function(inputObject)
+	local random = Random.new()
+	hoverSfx.PlaybackSpeed = random:NextNumber(0.5, 3)
+	hoverSfx:Play()
+end)
 
 -- // >>>>>>>>>>>>>>>>>>>>>>>>>>>><|[MENU CONTROLS]|><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \\
 -- // Toggle Frame Function
@@ -824,7 +1214,7 @@ end
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 
-	if input.KeyCode == Enum.KeyCode.RightShift then
+	if input.KeyCode == Enum.KeyCode.P then
 		toggleFrame()
 	elseif input.KeyCode == Enum.KeyCode.Delete then
 		screenGui:Destroy()
@@ -836,6 +1226,7 @@ local function closeAll()
 	teleportFrame.Visible = false
 	counterbloxFrame.Visible = false
 	blindshotFrame.Visible = false
+	bloxfruitFrame.Visible = false
 end
 
 -- // Teleport Menu Button Click
@@ -893,6 +1284,26 @@ end)
 
 -- // Blindshot Menu Button Hover
 blindshotMenuButton.InputBegan:Connect(function(inputObject)
+	local random = Random.new()
+	hoverSfx.PlaybackSpeed = random:NextNumber(0.5, 3)
+	hoverSfx:Play()
+end)
+
+-- // Bloxfruit Menu Button Click
+bloxfruitMenuButton.Activated:Connect(function()
+	local random = Random.new()
+	clickSfx.PlaybackSpeed = random:NextNumber(0.5, 2.5)
+	clickSfx:Play()
+
+	if bloxfruitFrame.Visible == false then
+		closeAll()
+
+		bloxfruitFrame.Visible = true
+	end
+end)
+
+-- // Bloxfruit Menu Button Hover
+bloxfruitMenuButton.InputBegan:Connect(function(inputObject)
 	local random = Random.new()
 	hoverSfx.PlaybackSpeed = random:NextNumber(0.5, 3)
 	hoverSfx:Play()
