@@ -1214,7 +1214,7 @@ end
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 
-	if input.KeyCode == Enum.KeyCode.P then
+	if input.KeyCode == Enum.KeyCode.O then
 		toggleFrame()
 	elseif input.KeyCode == Enum.KeyCode.Delete then
 		screenGui:Destroy()
